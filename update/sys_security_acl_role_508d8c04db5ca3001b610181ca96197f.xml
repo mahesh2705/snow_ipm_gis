@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_security_acl_role">
+    <sys_security_acl_role action="INSERT_OR_UPDATE">
+        <sys_class_name>sys_security_acl_role</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-08-28 05:50:51</sys_created_on>
+        <sys_id>508d8c04db5ca3001b610181ca96197f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_270741_arcgis_po_gis_data.x_270741_arcgis_po.gis_data_user</sys_name>
+        <sys_package display_value="arcgis_portal" source="x_270741_arcgis_po">8302887fdb44a3001b610181ca96190b</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="arcgis_portal">8302887fdb44a3001b610181ca96190b</sys_scope>
+        <sys_security_acl display_value="x_270741_arcgis_po_gis_data">908d8c04db5ca3001b610181ca96197c</sys_security_acl>
+        <sys_update_name>sys_security_acl_role_508d8c04db5ca3001b610181ca96197f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-08-28 05:50:51</sys_updated_on>
+        <sys_user_role display_value="x_270741_arcgis_po.gis_data_user" name="x_270741_arcgis_po.gis_data_user">9c8d0c04db5ca3001b610181ca9619ea</sys_user_role>
+        <transaction_id/>
+    </sys_security_acl_role>
+</record_update>

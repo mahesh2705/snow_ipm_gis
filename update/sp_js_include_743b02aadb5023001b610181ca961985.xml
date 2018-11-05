@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sp_js_include">
+    <sp_js_include action="INSERT_OR_UPDATE">
+        <display_name>https://davidshimjs.github.io/qrcodejs/qrcode.min.js</display_name>
+        <source>url</source>
+        <sys_class_name>sp_js_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-09-05 09:25:19</sys_created_on>
+        <sys_id>743b02aadb5023001b610181ca961985</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>https://davidshimjs.github.io/qrcodejs/qrcode.min.js</sys_name>
+        <sys_package display_value="arcgis_portal" source="x_270741_arcgis_po">8302887fdb44a3001b610181ca96190b</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="arcgis_portal">8302887fdb44a3001b610181ca96190b</sys_scope>
+        <sys_ui_script/>
+        <sys_update_name>sp_js_include_743b02aadb5023001b610181ca961985</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-09-05 09:46:12</sys_updated_on>
+        <url>https://davidshimjs.github.io/qrcodejs/qrcode.min.js</url>
+    </sp_js_include>
+</record_update>

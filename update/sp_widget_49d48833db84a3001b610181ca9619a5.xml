@@ -1,0 +1,991 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <client_script><![CDATA[function() {
+    /* widget controller */
+    var c = this;
+    require([
+        "esri/layers/FeatureLayer",
+        "esri/map",
+        "esri/dijit/HomeButton",
+        "esri/dijit/BasemapGallery",
+        "esri/toolbars/draw",
+        "esri/symbols/PictureMarkerSymbol",
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/symbols/SimpleLineSymbol",
+        "esri/symbols/SimpleFillSymbol",
+        "esri/symbols/CartographicLineSymbol",
+        "esri/graphic",
+        "esri/tasks/RouteTask",
+        "esri/tasks/RouteParameters",
+        "esri/tasks/FeatureSet",
+        "esri/geometry/webMercatorUtils",
+        "esri/geometry/Point",
+        "esri/geometry/Polygon",
+        "esri/geometry/Polyline",
+        "esri/Color",
+        "esri/InfoTemplate",
+        "esri/layers/GraphicsLayer",
+        "esri/geometry/jsonUtils",
+        "esri/dijit/Legend",
+        "dijit/ConfirmDialog",
+        "dijit/Dialog",
+				"dijit/TooltipDialog",
+        "dijit/form/Form",
+        "dojo/dom-form",
+        "dijit/form/Button",
+				"dijit/form/DropDownButton",
+        "dijit/form/TextBox",
+        "dijit/form/ComboBox",
+        "dijit/TitlePane",
+        "dijit/layout/ContentPane",
+        "dijit/form/HorizontalSlider",
+        "dijit/form/HorizontalRuleLabels",
+        "dojo/store/Memory",
+        "dojo/dom-style",
+        "dojo/dom-class",
+        "dojo/dom",
+        "dojo/on",
+        "dojo/dom-construct",
+        "dojo/_base/array",
+        "dojo/parser",
+        "dojo/ready",
+        "dojo/domReady!"
+    ], function (FeatureLayer, Map, HomeButton, BasemapGallery, Draw, PictureMarkerSymbol, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, CartographicLineSymbol, Graphic, RouteTask,
+        RouteParameters, FeatureSet, webMercatorUtils, Point, Polygon, Polyline, Color, InfoTemplate, GraphicsLayer, jsonUtils, Legend, ConfirmDialog, Dialog, TooltipDialog, Form, domForm,
+        Button, DropDownButton, TextBox, ComboBox, TitlePane, ContentPane, HorizontalSlider, HorizontalRuleLabels, Memory, domStyle, domClass, dom, on, domConstruct, arrayUtils, parser, ready) {
+            //parser.parse();                              
+            ready(function () {
+                var drawnGeomType, drawnGeom, geotagdata, manage_route, geomObj;
+                var map = new Map("map", {
+                    center: [-121.8796, 37.2440],
+                    zoom: 16,
+                    basemap: "topo"
+                });
+                esri.config.defaults.io.corsEnabledServers.push("http://sampleserver3.arcgisonline.com");
+                on(dojo.byId("retriveData"), "click", retriveData);
+                on(dojo.byId("routemap"), "click", routemap);
+							
+							map.on("load", function(){
+								document.getElementById("map").style.cssText="height:"+(document.documentElement.clientHeight-67) +"px;" + "width:"+(document.documentElement.clientWidth) +"px;"+ "margin-top: -8px;margin-left: -15px;overflow: hidden;";
+  });
+                function routemap() {
+                    if (typeof manage_route != "undefined") {
+                        manage_route.remove();
+												manage_route = undefined;
+                    } else {
+                        manage_route = map.on("click", addStop);
+
+                        routeTask = new RouteTask("http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Network/USA/NAServer/Route");
+
+                        //setup the route parameters
+                        routeParams = new RouteParameters();
+                        routeParams.stops = new FeatureSet();
+                        routeParams.outSpatialReference = {
+                            "wkid": 102100
+                        };
+
+                        routeTask.on("solve-complete", showRoute);
+                        routeTask.on("error", errorHandler);
+
+                        //define the symbology used to display the route
+                        stopSymbol = new PictureMarkerSymbol('pinicon.png', 28, 28);
+                        //stopSymbol.outline.setWidth(4);
+                        routeSymbol = new SimpleLineSymbol().setColor(new dojo.Color([0, 0, 255, 0.7])).setWidth(5);
+                        routeSymbol.cap = "round";
+                        routeSymbol.color = "dodgerblue";
+                        routeSymbol.join = "round";
+                        //Adds a graphic when the user clicks the map. If 2 or more points exist, route is solved.
+                        function addStop(evt) {
+                            var stop = map.graphics.add(new Graphic(evt.mapPoint, stopSymbol));
+                            routeParams.stops.features.push(stop);
+
+                            if (routeParams.stops.features.length >= 2) {
+                                routeTask.solve(routeParams);
+                                lastStop = routeParams.stops.features.splice(0, 1)[0];
+                            }
+                        }
+
+                        //Adds the solved route to the map as a graphic
+                        function showRoute(evt) {
+                            map.graphics.add(evt.result.routeResults[0].route.setSymbol(routeSymbol));
+                        }
+
+                        //Displays any error returned by the Route Task
+                        function errorHandler(err) {
+                            alert("An error occured\n" + err.message + "\n" + err.details.join("\n"));
+
+                            routeParams.stops.features.splice(0, 0, lastStop);
+                            map.graphics.remove(routeParams.stops.features.splice(1, 1)[0]);
+                        }
+                    }
+                }
+                var basemapGalleryCP = new ContentPane({
+                    content: "<div id = 'basemapGallery'>fsdfs</div>",
+                    style: "width:380px; height:280px; overflow:auto;"
+                });
+
+                new TitlePane({
+                    title: "Switch Basemap",
+                    content: basemapGalleryCP,
+                    open: false
+                }, "basemapGalleryTP");
+
+                var basemapGallery = new BasemapGallery({
+                    showArcGISBasemaps: true,
+                    map: map
+                }, "basemapGallery");
+                basemapGallery.startup();
+
+                //Start:: Adding Legend Pane
+                var legendPane = new ContentPane({
+                    content: "<div id = 'legendDiv'></div>",
+                    style: "width:300px; overflow:auto;"
+                });
+
+                new TitlePane({
+                    title: "Legend",
+                    content: legendPane,
+                    open: false
+                }, "legendPane");
+
+                var legendDijit = new Legend({
+                    map: map
+                }, "legendDiv");
+                legendDijit.startup();
+
+                map.on("layers-add-result", function (evt) {
+                    legendDijit.refresh();
+                    console.log(evt.layers);
+                    var layerInfo = arrayUtils.map(evt.layers, function (layer, index) {
+                        return { layer: layer.layer, title: layer.layer.name };
+                    });
+                    legendDijit.layerInfos = layerInfo
+                });
+                //End:: Adding Legend Pane
+
+							map.on("load", function () {
+								//map.on("mouse-move", showCoordinates);
+								//map.on("mouse-drag", showCoordinates);
+							});
+							function showCoordinates(evt) {
+								var mp = webMercatorUtils.webMercatorToGeographic(evt.mapPoint);
+								//dom.byId("latloninfo").innerHTML = '<strong>Latitude:' + mp.y.toFixed(4) + ', Longitude:' + mp.x.toFixed(4) + '</stong>';
+							}
+
+                on(dojo.byId("retriveData"), "click", retriveData);
+                var pointAttr = {
+                    place: "The Westin Chicago River North ,Chicago",
+                    severity: "High",
+                    remark: "Point of interest saved",
+                    feature_type: "Point",
+                    geotag_img: "Geo Tag Image"
+                }
+
+                var symbol;
+                var lineAttr = {
+                    place: "225 N Michigan Ave Chicago, IL 60601",
+                    severity: "Medium",
+                    remark: "Marking boundary",
+                    feature_type: "Line",
+                    geotag_img: "Geo Tag Image"
+                }
+
+                var polyAttr = {
+                    place: "Chicago Architecture Foundation, Chicago",
+                    severity: "Low",
+                    remark: "Area of interest",
+                    feature_type: "Polygon",
+                    geotag_img: "Geo Tag Image"
+                }
+                var home = new HomeButton({
+                    map: map
+                }, "HomeButton");
+
+                home.startup();
+
+                var form = new Form({ id: "myform", innerHTML: "<div id=imgTest name:'geotag_img' style:'position: absolute;width: 66px;height: 80px;margin-left: 213px;'></div>" });
+
+                new TextBox({
+                    placeHolder: "Place",
+                    id: 'place',
+                    name: 'place',
+                    style: "margin: 2px 0 10px 0px;"
+                }).placeAt(form.containerNode);
+
+                new TextBox({
+                    placeHolder: "Remark",
+                    id: 'remark',
+                    name: 'remark',
+                    style: "margin: 2px 0 10px 0px;"
+                }).placeAt(form.containerNode);
+
+                /*new TextBox({
+                placeHolder: "Latitude",
+                        id:'lat',
+                      name: 'lat'
+            }).placeAt(form.containerNode);
+    
+                new TextBox({
+                placeHolder: "Longitude",
+                        label:'Longitude',
+                        id:'long',
+                        name: 'long'
+            }).placeAt(form.containerNode);*/
+
+                var stateStore = new Memory({
+                    data: [
+                        { name: "Low", id: "low" },
+                        { name: "Medium", id: "medium" },
+                        { name: "High", id: "high" }
+                    ]
+                });
+
+                var comboBox = new ComboBox({
+                    id: "severity",
+                    name: "severity",
+                    value: "Select Severity",
+                    store: stateStore,
+                    searchAttr: "name",
+                    style: "margin: 2px 0 10px 0px;"
+                }, "stateStore").placeAt(form.containerNode);
+
+
+
+                var myFormDialog = new Dialog({
+                    id: "mybox",
+                    title: "Data Form",
+                    content: form,
+                    style: "width: 290px"
+                });
+
+                new Button({
+                    label: "Submit",
+                    id: 'savedata'
+                }).placeAt(form.containerNode);
+
+                var gtagDial = new Dialog({
+                    id: "dial",
+                    title: "Add Image",
+                    content: "<input type='file' id='imageid' accept='image/*' /><br>",
+                    style: "width: 230px"
+                });
+
+                new Button({
+                    label: "Upload",
+                    id: 'saveimg',
+                    onClick: function () {
+                        gtagDial.hide();
+                        gtagDial.reset();
+                        function getBase64Image(imge) {
+                            var filesSelected = imge;
+                            if (filesSelected.length > 0) {
+                                var fileToLoad = filesSelected[0];
+                                var fileReader = new FileReader();
+                                fileReader.onload = function (fileLoadedEvent) {
+                                    var srcData = fileLoadedEvent.target.result; // <--- data: base64
+                                    var newImage = document.createElement('img');
+                                    newImage.src = srcData;
+                                    var geotgdata = newImage;						
+                                    geotgdata.style = "position:absolute;width:66px;height:60px;margin-left:166px;margin-top:-60px;";
+                                    geotagdata = geotgdata.outerHTML;
+                                    newImage.style = "position: absolute;width:66px;height:80px;border:1;margin-left: 213px;";
+                                    document.getElementById("imgTest").innerHTML = newImage.outerHTML;
+                                }
+                                fileReader.readAsDataURL(fileToLoad);
+                            }
+                        }
+                        var base64 = getBase64Image(document.getElementById("imageid").files);
+                        console.log(base64);
+                    }
+                }).placeAt(gtagDial.containerNode);
+
+                new Button({
+                    label: "Geotag",
+                    id: 'geotag',
+                    onClick: function () {
+                        gtagDial.show();
+                    }
+                }).placeAt(form.containerNode);
+
+                var shareUrl = new Dialog({
+                    id: "shareurl",
+                    title: "Share Url",
+                    content: "<a target='_blank' href=" + window.location.href + ">" + window.location.href + "</a>",
+                    //"<input type='text' style='width:280px;cursor: pointer;' target='_blank' id='imageid' readonly='readonly' value="+window.location.href+" /><br>",
+                    style: "width: 300px"
+                });
+
+                new Button({
+                    label: "Share",
+                    id: 'share',
+                    onClick: function () {
+                        shareUrl.show();
+                    }
+                }).placeAt(form.containerNode);
+
+                new Button({
+                    label: "Cancel",
+                    onClick: function () {
+                        myFormDialog.hide();
+                        myFormDialog.reset();
+											  domConstruct.empty("imgTest");
+                    }
+                }).placeAt(form.containerNode);
+							
+				var exportGaphic = new Dialog({
+            id: "export" ,
+            title: "Export Graphics",
+            content:"<select id = 'exportGraphic'><option value = ''>Select File Format</option><option value = 'geojson'>GeoJSON File</option><option value = 'kml'>KML File</option><option value = 'shape'>Shape File</option></select><br>",
+            style: "width: 230px"
+        });
+        
+        new Button({
+            label: "Export",
+            onClick: function(){
+                exportGaphic.hide(); 
+								var exportType = document.getElementById("exportGraphic").value;                
+                var filename;
+                if(exportType === "geojson") {
+                    if(geomObj.type === "Point"){
+                        filename = "point_data.json"
+                    }
+                    else if(geomObj.type === "LineString"){
+                        filename = "line_data.json"
+                    }
+                    else if(geomObj.type === "Polygon"){
+                        filename = "polygon_data.json"
+                    }
+                    saveData(JSON.stringify(geomObj), filename);	                    
+                }
+								else if(exportType === "kml") {
+                    if(geomObj.type === "Point"){
+                        filename = "point_data.kml"
+                    }
+                    if(geomObj.type === "LineString"){
+                        filename = "line_data.kml"
+                    }
+                    if(geomObj.type === "Polygon"){
+                        filename = "polygon_data.kml"
+                    }
+                    console.log(tokml(geomObj));
+                    saveData(tokml(geomObj), filename);                    
+                }
+							else if(exportType === "shape") {
+								// geojson = [];
+								//var type = 
+								var options = {
+									folder: 'myshapes',
+									types: {
+										point: 'mypoints',
+										polygon: 'mypolygons',
+										line: 'mylines'
+									}
+								};
+								
+								shpwrite.download({
+								type: 'FeatureCollection',
+								features: [
+								{
+								type: 'Feature',
+								geometry: {
+                type: geomObj.type,
+                coordinates: geomObj.coordinates
+								},
+								properties: {
+                name: 'Foo'
+								}
+								}]},options);
+								//shpwrite.download(geomObj, options);
+							}
+            }
+        }).placeAt(exportGaphic.containerNode);
+        
+        new Button({
+            label: "Export",
+            onClick: function(){
+                exportGaphic.show();								
+            }
+        }).placeAt(form.containerNode);
+
+                ///////////////////////QR/////////////////////////////                                                                                       
+                function makeCode() {
+                    var qid = document.getElementById("qrcode");
+                    var qrcode = new QRCode(qid, {
+                        width: 150,
+                        height: 150
+                    });
+                    var text = window.location.href;
+                    qrcode.makeCode(text);
+                    myDialog.show();
+                }
+                var myDialog = new Dialog({
+                    title: "Scan QR Code",
+                    content: "<div id = 'qrcode'></div>",
+                    style: "width: 167px; height: 200px"
+                });
+
+                on(dojo.byId("generate"), "click", function () {
+                    domConstruct.empty("qrcode");
+                    makeCode();
+                });
+                ///////////////////////QR/////////////////////////////       
+
+                dojo.connect(dijit.byId("savedata"), "onClick", function () {
+                    var formJson = JSON.parse(dojo.formToJson("myform"));
+                    if (drawnGeomType == "point") {
+                        pointAttr.place = formJson.place;
+                        pointAttr.severity = formJson.severity;
+                        pointAttr.remark = formJson.remark;
+                        pointAttr.geotag_img = geotagdata;
+                        savetoDB(drawnGeom);
+                    }
+
+                    if (drawnGeomType == "polyline") {
+                        lineAttr.place = formJson.place;
+                        lineAttr.severity = formJson.severity;
+                        lineAttr.remark = formJson.remark;
+                        lineAttr.geotag_img = geotagdata;
+                        savetoDB(drawnGeom);
+                    }
+
+                    if (drawnGeomType == "polygon") {
+                        polyAttr.place = formJson.place;
+                        polyAttr.severity = formJson.severity;
+                        polyAttr.remark = formJson.remark;
+                        polyAttr.geotag_img = geotagdata;
+                        savetoDB(drawnGeom);
+                    }
+										geotagdata="";
+										domConstruct.empty("imgTest");
+                });
+
+                domClass.add(dojo.body(), "claro");
+
+							//var infoTemplate = new InfoTemplate();
+          //infoTemplate.setTitle("${NAME}");
+          //infoTemplate.setContent("<b>Name :</b>${NAME}<br/>" +
+                                  //"<b>Population: </b>${POPULATION:NumberFormat}<br/><br/>" +
+                                  //"<b>Capital: </b>${CAPITAL}<br/>" +
+                                  //"<b>Households: </b>${HOUSEHOLDS}");
+                //var fl = new FeatureLayer('https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Freeway_System/FeatureServer/1');
+																				// {
+            //mode: FeatureLayer.MODE_SNAPSHOT,
+            //infoTemplate: infoTemplate
+            
+          //});
+							var fl = new FeatureLayer('https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Major_Cities/FeatureServer/0');
+                map.addLayers([fl]);
+                map.on("load", initToolbar);
+							
+
+                // markerSymbol is used for point and multipoint, see http://raphaeljs.com/icons/#talkq for more examples
+                var markerSymbol = new SimpleMarkerSymbol();
+                markerSymbol.setPath("M16,4.938c-7.732,0-14,4.701-14,10.5c0,1.981,0.741,3.833,2.016,5.414L2,25.272l5.613-1.44c2.339,1.316,5.237,2.106,8.387,2.106c7.732,0,14-4.701,14-10.5S23.732,4.938,16,4.938zM16.868,21.375h-1.969v-1.889h1.969V21.375zM16.772,18.094h-1.777l-0.176-8.083h2.113L16.772,18.094z");
+                markerSymbol.setColor(new Color("#00FFFF"));
+
+                // lineSymbol used for freehand polyline, polyline and line. 
+                //var lineSymbol = new CartographicLineSymbol(
+                //CartographicLineSymbol.STYLE_SOLID,
+                //new Color([255,0,0]), 10, 
+                //CartographicLineSymbol.CAP_ROUND,
+                // CartographicLineSymbol.JOIN_MITER, 5
+                //);
+
+                var lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 3);
+                // fill symbol used for extent, polygon and freehand polygon, use a picture fill symbol
+                // the images folder contains additional fill images, other options: sand.png, swamp.png or stiple.png
+                var polySymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
+
+
+                function initToolbar() {
+                    tb = new Draw(map);
+                    tb.on("draw-end", addGraphic);
+                    // event delegation so a click handler is not
+                    // needed for each individual button
+                    on(dom.byId("info"), "click", function (evt) {
+                        if (evt.target.id === "info") {
+                            return;
+                        }
+                        var tool = evt.target.id.toLowerCase();
+                        map.disableMapNavigation();
+                        tb.activate(tool);
+                    });
+                }
+
+                function addGraphic(evt) {
+                  document.getElementById("imageid").value = '';
+									domConstruct.empty("imgTest");   
+									var fileName;
+                    drawnGeomType = evt.geometry.type;
+                    drawnGeom = evt.geometry;
+                    //var geomJson = JSON.stringify(drawnGeom);   
+                    //var mp = webMercatorUtils.webMercatorToGeographic(evt.geometry);
+                    //console.log(mp);
+                    var graphicattr = { type: drawnGeomType };
+                    var contents = "<div'width:auto;height:auto'><b>Type</b>:" + drawnGeomType + "</div>";
+                    var graphicpop = new InfoTemplate("Info Template", contents);
+                    //deactivate the toolbar and clear existing graphics 
+                    tb.deactivate();
+                    map.enableMapNavigation();
+                    // figure out which symbol to use
+                    var symbol;
+                    if (evt.geometry.type === "point" || evt.geometry.type === "multipoint") {
+                        symbol = markerSymbol;
+                        fileName = "point_data.json";
+                    }
+                    else if (evt.geometry.type === "line" || evt.geometry.type === "polyline") {
+                        symbol = lineSymbol;
+                        fileName = "line_data.json";
+                    }
+                    else {
+                        symbol = polySymbol;
+                        fileName = "polygon_data.json";
+                    }
+                    map.graphics.add(new Graphic(evt.geometry, symbol, graphicattr).setInfoTemplate(graphicpop));
+                    //map.graphics.add(new Graphic(point, markerSymbol, geoattr).setInfoTemplate(popups));                                                        
+                    saveGraphics(evt.geometry, fileName);
+                    myFormDialog.show();
+                    //savetoDB(evt.geometry);
+                }
+
+                function savetoDB(geometry) {
+                    var storeGeomJson = JSON.stringify(geometry.toJson());
+                    c.data.type = "save"
+                    if (geometry.type == "point") {
+                        c.data.place = pointAttr.place;
+                        c.data.severity = pointAttr.severity;
+                        c.data.remark = pointAttr.remark;
+                        c.data.feature_type = pointAttr.feature_type;
+                        c.data.json_string = storeGeomJson;
+                        c.data.geotag_img = pointAttr.geotag_img;
+                    }
+
+                    if (geometry.type == "polyline") {
+                        c.data.place = lineAttr.place;
+                        c.data.severity = lineAttr.severity;
+                        c.data.remark = lineAttr.remark;
+                        c.data.feature_type = lineAttr.feature_type;
+                        c.data.json_string = storeGeomJson;
+                        c.data.geotag_img = lineAttr.geotag_img;
+                    }
+
+                    if (geometry.type == "polygon") {
+                        c.data.place = polyAttr.place;
+                        c.data.severity = polyAttr.severity;
+                        c.data.remark = polyAttr.remark;
+                        c.data.feature_type = polyAttr.feature_type;
+                        c.data.json_string = storeGeomJson;
+                        c.data.geotag_img = polyAttr.geotag_img;
+                    }
+
+                    c.server.update();
+                    myFormDialog.reset();
+                    myFormDialog.hide();
+                }
+								var gpLyr = new GraphicsLayer();
+                function retriveData() {
+                    var Sym;
+                    c.data.type = "retrive";
+                    c.server.get(c.data).then(function (serverData) {
+                        if (serverData.data.map) {
+                            finalData = serverData.data.map;
+                            var Len = finalData.length;
+                            gpLyr = new GraphicsLayer({ id: "locationPoints" });
+                            map.addLayers([gpLyr]);
+
+                            for (i = 0; i < Len; i++) {
+                                var geom = jsonUtils.fromJson(JSON.parse(finalData[i].json_string))
+                                if (finalData[i].feature_type == "Point") {
+                                    Sym = markerSymbol
+                                }
+                                else if (finalData[i].feature_type == "Line") {
+                                    Sym = lineSymbol;
+                                }
+                                else {
+                                    Sym = polySymbol;
+                                }
+                                var geomAttributes = { place: finalData[i].place, severity: finalData[i].severity, remark: finalData[i].remark, geotag_img: finalData[i].geotag_img };
+                                var content = "<div style='width:auto;height:auto'><b>Place</b>:" + finalData[i].place + "<br><b>Severity </b>: " + finalData[i].severity + "<br><b>Remark</b>: " + finalData[i].remark + "<br>" + finalData[i].geotag_img + "</div>";
+                                var geomInfoTemplate = new InfoTemplate("Info Template", content);
+                                var geomGraphic = new Graphic(geom, Sym, geomAttributes).setInfoTemplate(geomInfoTemplate);
+                                gpLyr.add(geomGraphic);
+                            }
+                        }
+                    })
+                }
+
+                function saveGraphics(geometry, fileName) {
+                    var test = ArcgisToGeojsonUtils.arcgisToGeoJSON(geometry);
+                    //console.log(test);
+                    var obj = test;
+                    var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
+                    geomObj = obj;
+										//saveData(obj, fileName);
+                }
+
+                var saveData = (function (data, fileName) {
+                    var a = document.createElement("a");
+                    document.body.appendChild(a);
+                    a.style = "display: none";
+                    return function (data, fileName) {
+                        //var json = JSON.stringify(data),
+                        var  blob = new Blob([data], { type: "octet/stream" }),
+                            url = window.URL.createObjectURL(blob);
+                        a.href = url;
+                        a.download = fileName;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    };
+                }());
+							
+								noshpDialog = new Dialog({
+										title: "Error",
+										id:'noshp',
+										content: "No Shape File found",
+										style: "width: 200px; text-align: center;"
+								});  
+								new Button({
+										label: "OK",
+										id: 'noshperr',
+										style:'display:block; text-align: center;',
+										onClick: function () {
+														noshpDialog.hide();
+										}
+								}).placeAt(noshpDialog.containerNode);
+							
+                document.getElementById('import').onclick = function () {
+									var fileTypes = document.getElementById('selectFiles').value;
+									var fileExtn = fileTypes.split('.').pop();
+									console.log(fileExtn);
+									if(fileExtn=="kml" || fileExtn=="json" || fileExtn=="shp" || fileExtn=="zip" ){
+										var files = document.getElementById('selectFiles').files;
+                    if (files.length <= 0) {
+                        return false;
+                    }
+                    var fr = new FileReader();
+                    fr.onload = function (e) {
+                        var result
+												//Check if kml file is being imported
+												if(files[0].name.split(".")[1] === "kml"){
+														var dom = (new DOMParser()).parseFromString(e.target.result, 'text/xml');
+														result = toGeoJSON.kml(dom).features[0].geometry;
+														ConvertToGeoJson(result);
+												}
+												else if (files[0].name.split(".")[1] === "json"){
+														result = JSON.parse(e.target.result);
+														ConvertToGeoJson(result);
+												}
+												else {
+													var tmppath = URL.createObjectURL(files[0]);
+													shp(tmppath).then(function(data){
+													//console.log(data);
+													result = data.features[0].geometry;
+													ConvertToGeoJson(result);
+													});
+												}
+											
+											function ConvertToGeoJson(result){
+                        var geometry = ArcgisToGeojsonUtils.geojsonToArcGIS(result);
+                        var geoattr = { type: result.type, coordinates: result.coordinates };
+                        var geocontent = "<div'width:auto;height:auto'><b>Type</b>:" + result.type + "<br><b>coordinates</b>:" + result.coordinates + "</div>";
+                        var popups = new InfoTemplate("Info Template", geocontent);
+                        if (geometry.rings) {
+                            var polygon = new Polygon(geometry.rings);
+                            polygon.spatialReference = map.spatialReference
+                            var markerSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2), new Color([62, 159, 250, 0.25]));
+                            map.graphics.add(new Graphic(polygon, markerSymbol, geoattr).setInfoTemplate(popups));
+                        }
+                        else if (geometry.paths) {
+                            var polyline = new Polyline(geometry.paths);
+                            polyline.spatialReference = map.spatialReference
+														var markerSymbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([62, 159, 250, 1]), 4);
+                            map.graphics.add(new Graphic(polyline, markerSymbol, geoattr).setInfoTemplate(popups));
+                        }
+                        else {
+                            var point = new Point(geometry.x, geometry.y, map.spatialReference);
+                            var markerSymbol = new SimpleMarkerSymbol();
+                            markerSymbol.setPath("M16,4.938c-7.732,0-14,4.701-14,10.5c0,1.981,0.741,3.833,2.016,5.414L2,25.272l5.613-1.44c2.339,1.316,5.237,2.106,8.387,2.106c7.732,0,14-4.701,14-10.5S23.732,4.938,16,4.938zM16.868,21.375h-1.969v-1.889h1.969V21.375zM16.772,18.094h-1.777l-0.176-8.083h2.113L16.772,18.094z");
+                            markerSymbol.setColor(new Color("#00FFFF"));
+                            map.graphics.add(new Graphic(point, markerSymbol, geoattr).setInfoTemplate(popups));
+                        }
+											}
+                        document.getElementById("importJSON").style.display = "none";
+                    }
+                    fr.readAsText(files.item(0));
+                }else{
+									alert("Invalid File Format!!!!!");
+							}
+						}
+
+                document.getElementById("displayImportDiv").onclick = function () {
+                    var id = document.getElementById("importJSON");
+                    if (id.style.display == "none") {
+                        id.style.display = "block";
+                    }
+                    else {
+                        id.style.display = "none";
+                    }
+                    document.getElementById("selectFiles").value = "";
+                }
+                document.getElementById("closeImportJSON").onclick = function () {
+                    document.getElementById("importJSON").style.display = "none";
+                    document.getElementById("selectFiles").value = "";
+                }
+
+                on(dom.byId("geoloaction"), "click", function (evt) {
+                    if (navigator.geolocation) {
+                        domClass.add("geoloaction", "geoloc");
+                        navigator.geolocation.getCurrentPosition(zoomToLocation, locationError);
+                        watchId = navigator.geolocation.watchPosition(showLocation, locationError);
+                    }
+                });
+
+                function locationError(error) {
+                    //error occurred so stop watchPosition
+                    if (navigator.geolocation) {
+                        navigator.geolocation.clearWatch(watchId);
+                    }
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            alert("Location not provided");
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            alert("Current location not available");
+                            break;
+                        case error.TIMEOUT:
+                            alert("Timeout");
+                            break;
+                        default:
+                            alert("unknown error");
+                            break;
+                    }
+                }
+
+                function zoomToLocation(location) {
+                    var pt = new Point(location.coords.longitude, location.coords.latitude);
+                    addGeoGraphic(pt);
+                    map.centerAndZoom(pt, 18);
+                }
+
+                function showLocation(location) {
+                    //zoom to the users location and add a graphic
+                    var pt = new Point(location.coords.longitude, location.coords.latitude);
+                    if (!graphic) {
+                        addGeoGraphic(pt);
+                    }
+                    else { // move the graphic if it already exists
+                        graphic.setGeometry(pt);
+                    }
+                    map.centerAt(pt);
+                }
+
+                function addGeoGraphic(pt) {
+                    var symbol = new SimpleMarkerSymbol(
+                        SimpleMarkerSymbol.STYLE_CIRCLE,
+                        12,
+                        new SimpleLineSymbol(
+                            SimpleLineSymbol.STYLE_SOLID,
+                            new Color([210, 105, 30, 0.5]),
+                            8
+                        ),
+                        new Color([210, 105, 30, 0.9])
+                    );
+                    graphic = new Graphic(pt, symbol);
+                    map.graphics.add(graphic);
+                }
+								
+									on(dom.byId("removegeolocation"), "click", function(evt) {
+									if( navigator.geolocation ) {
+										domClass.remove("geoloaction", "geoloc");
+										navigator.geolocation.clearWatch(watchId);			
+										removeGeographic();}
+									});
+			
+									function removeGeographic(){
+										map.graphics.remove(graphic);
+									}
+							on(dom.byId("clearall"), "click", function(evt) {
+								map.graphics.clear();
+								gpLyr.clear();
+							});
+							
+            });
+        });
+}
+]]></client_script>
+        <controller_as>c</controller_as>
+        <css>body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+#map {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+}
+.textClass{
+  margin: 2px 0 10px 0px;
+}
+
+#verticalToolbar{
+  position:absolute;
+  z-index:1000;
+  padding-top:5px;
+  right:20px; 
+  top: 40px; 
+  width: 35px;   
+  background-color: rgba(255, 255, 255, .5);
+  text-align: center;
+  border-radius: 5px;
+}
+
+
+#HomeButton {
+      position: absolute;
+      top: 85px;
+      left: 21px;
+      z-index: 50;
+}
+
+.geoloc1 {  
+  background: url('blink.png');
+  animation: play 1s steps(2) infinite;
+}
+
+@keyframes play {
+    100% { background-position: -36px; }
+}
+
+.pointIcon {
+  background-image: url(draw_point.png);
+  width: 16px;
+  height: 16px;        
+}
+
+.drawTool {
+    cursor: pointer;
+    border: 2px solid #c3b3b3; padding: 1px;    
+  	height:30px !important;
+  	width:30px !important;
+    border-radius: 5px;
+  	vertical-align: inherit !important;
+}
+
+.drawTool:hover {
+	opacity:0.7;  
+}
+
+.drawTool:active {
+	opacity:0.2;
+}
+
+.container {
+  width:100% !important;
+  padding:0px !important;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>true</has_preview>
+        <id>apw</id>
+        <internal>false</internal>
+        <link/>
+        <name>arcgis_portal_widget</name>
+        <option_schema/>
+        <public>true</public>
+        <roles/>
+        <script><![CDATA[(function() {
+ /* populate the 'data' object */
+  /* e.g., data.table = $sp.getValue('table'); */
+var gr= new GlideRecord('x_270741_arcgis_po_gis_data');
+	gr.query();
+	if(input){
+		if(input.type=="save"){
+		gr.place= input.place;
+		gr.severity= input.severity;
+		gr.remark = input.remark;
+		gr.feature_type = input.feature_type;
+		gr.json_string = input.json_string;
+	  gr.geotag_img = input.geotag_img;
+			console.log(input.geotag_img);
+		gr.insert();
+		//gs.addInfoMessage(input.feature_type);
+		}else{
+	
+		//gs.addInfoMessage(input.type.toString());
+		gr.query();
+		var pdata =[]
+		while(gr.next()){
+			var arr = {}
+			//gs.addInfoMessage(gr.place.toString());
+			arr.place = gr.place.toString();
+			arr.json_string = gr.json_string.toString();
+			arr.severity = gr.severity.toString();
+			arr.remark = gr.remark.toString();
+			arr.feature_type = gr.feature_type.toString();
+			arr.geotag_img = gr.geotag_img.toString();
+			pdata.push(arr);
+		}
+	data.map = pdata;
+	}	
+}
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-08-27 10:34:56</sys_created_on>
+        <sys_id>49d48833db84a3001b610181ca9619a5</sys_id>
+        <sys_mod_count>452</sys_mod_count>
+        <sys_name>arcgis_portal_widget</sys_name>
+        <sys_package display_value="arcgis_portal" source="x_270741_arcgis_po">8302887fdb44a3001b610181ca96190b</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="arcgis_portal">8302887fdb44a3001b610181ca96190b</sys_scope>
+        <sys_update_name>sp_widget_49d48833db84a3001b610181ca9619a5</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-10-05 08:55:34</sys_updated_on>
+        <template><![CDATA[<div id="map">
+  <div id = "verticalToolbar">
+    <div id="info">      
+      <img id="Point" src = "draw_point.png" title = "Draw Point" class = "drawTool">    
+      <img id="Polyline" src ="draw_line.png" title = "Draw Polyline" class = "drawTool">      
+      <img id="Polygon" src = "draw_poly.png" title = "Draw Polygon" class = "drawTool">
+    </div>
+    <div> 
+      <img id="retriveData"  class = "drawTool" src = "getdata1.png" title = "Get data from Server">    
+      <img id = "geoloaction" class="drawTool" style="background: url('location.png') 58px;">    
+      <img id="routemap"  class = "drawTool" src = "route.png" title = "Make Route">    
+      <img id = "generate" class="drawTool" src = "qrcode.png" title = "Generate QR Code" style="display:none">
+      <img id = "displayImportDiv" class="drawTool" src="importIcon.png"  title = "Import Spatial Data">
+    	<img id = "removegeolocation" class="drawTool" style="background: url('location.png') 94.5px;">
+    	<img id = "clearall" class="drawTool" src="eraser.png" title="Clear Data">
+    </div>
+  </div>  
+
+  <div id = "importJSON" style="border:1px solid; z-Index:1000;background: white; display:none; width: 200px; padding: 10px; border-radius: 10px; max-height: calc(100% - 100px); position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <input type="file" id="selectFiles" value="Import" style="border-left: 1px solid #b5bcc7;" accept=".kml, .shp, .json, .zip">
+    <i id = "closeImportJSON" class="fa fa-close" style = "position: absolute; top: 5px; right: 5px; cursor: pointer;"></i>
+    <div style="text-align:center; padding-top: 10px;">
+      <img id="import" src = "import.png" height="32" width="32" style = "cursor:pointer;">
+    </div>
+    <div id="warnmsg" style="display:none">Invalid Format</div>
+  </div>  
+  <div id="HomeButton"></div>
+                
+  <div style="position:absolute; right:20px; top:5px; z-Index:1000;">
+    <div id = "basemapGalleryTP">                    
+    </div>
+  </div>
+  
+  <div style = "position: absolute; bottom: 15px; right: 20px; z-index:1000;">
+    <div id = "legendPane"></div>
+  </div>
+  <span id="latloninfo" style="position:absolute; bottom:5px; color:#000; z-index:50;"></span>
+</div>
+]]></template>
+    </sp_widget>
+</record_update>

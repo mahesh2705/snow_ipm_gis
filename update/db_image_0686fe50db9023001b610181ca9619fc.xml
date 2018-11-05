@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="db_image">
+    <db_image action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category>Service Portal</category>
+        <format>png</format>
+        <height>24</height>
+        <image/>
+        <name>draw_poly.png</name>
+        <size_bytes>814</size_bytes>
+        <sys_class_name>db_image</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-08-29 12:47:54</sys_created_on>
+        <sys_id>0686fe50db9023001b610181ca9619fc</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>draw_poly.png</sys_name>
+        <sys_package display_value="arcgis_portal" source="x_270741_arcgis_po">8302887fdb44a3001b610181ca96190b</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="arcgis_portal">8302887fdb44a3001b610181ca96190b</sys_scope>
+        <sys_update_name>db_image_0686fe50db9023001b610181ca9619fc</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-08-29 12:48:03</sys_updated_on>
+        <thumbnail/>
+        <width>24</width>
+    </db_image>
+    <sys_attachment action="INSERT_OR_UPDATE">
+        <average_image_color>#0</average_image_color>
+        <compressed>true</compressed>
+        <content_type>image/png</content_type>
+        <file_name>image</file_name>
+        <image_height>24</image_height>
+        <image_width>24</image_width>
+        <size_bytes>814</size_bytes>
+        <size_compressed>837</size_compressed>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-08-29 12:48:03</sys_created_on>
+        <sys_id>9596361cdb9023001b610181ca96190d</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-08-29 12:48:03</sys_updated_on>
+        <table_name>ZZ_YYdb_image</table_name>
+        <table_sys_id>0686fe50db9023001b610181ca9619fc</table_sys_id>
+    </sys_attachment>
+    <sys_attachment_doc action="INSERT_OR_UPDATE">
+        <data>H4sIAAAAAAAAAA==</data>
+        <length>16</length>
+        <position>0</position>
+        <sys_attachment display_value="image" sys_id="9596361cdb9023001b610181ca96190d">9596361cdb9023001b610181ca96190d</sys_attachment>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-08-29 12:48:03</sys_created_on>
+        <sys_id>d596361cdb9023001b610181ca96190d</sys_id>
+    </sys_attachment_doc>
+    <sys_attachment_doc action="INSERT_OR_UPDATE">
+        <data>AS4D0fyJUE5HDQoaCgAAAA1JSERSAAAAGAAAABgIBgAAAOB3PfgAAAAEc0JJVAgICAh8CGSIAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAqtJREFUSIntlLtPVEEUxr8zM7uXXS5CVt0AanhjQqzU+IiagJ0WNoaLxPg/aCxs/QMsNZFCiQk+2BB8VmophSHEBhMNhEQeClmUuyzu4947cyyWxXXBQOKj4mtmksl8v++cyRliZpTLcZzWUFReJRLNAIcBDhnmmSDvPwny/Hp4ePjruku/EZUCHMfpCEXlDTbc1Xi8KVQVr5JMABj4/m0FyYlkenkuZQklpozPzzSbl3aFPdLf358jIurtPRc3Ru4eHHz8nleN1wCO41TLCppq79xf03CkUZAiGG1gAgOtNYwurNrTSM25cKfdYGl6aSW7lImQII81V5IiX0qhmTHneUHP0MOhd6qYXkXFrbqO+srmky2CmQvm2sAYAza8tjIYdm0V7NoqtffIvhoTGGhfW8pSIEEWAMyPf2mbHZ29A+AgMTN6es53he2KF52XT0eVpdbSlqY32kAHhf1G71YqNoyxe6NZneOjohBfnG081lQwN6upNf+S3ujVCjYxBwAShFjTTrDgUwIAZEjGQ9EwmLlguEFriuCtSoSFApuIAAAislA0LzMsAtlsnrxUSilJRBUCALxskJge+5T+09aUKutmMsSYVQAQq449Ty0uwZ11YcftdZX4eR/utIvFiWQ6NeNGVFjlK+O2ibXE7N3tcSo3z6VycGdcxSxe/5yDi84lKel2a2dbpPZAHflZH4uTSSx8WEgvf06FpZJvA8/vV2S9CIIgDqkPSSWv72qL72k40WiRKHDS82lMvvqYCfL62qP7iZvrJllFxBPt6RYQfBkSI37e3LWU9XxgYGC5POnqcD5VYXV4R321WEmmfW8ln9MBriQeJh4AZV9FycUwACQSCW8r/e6+0H0GMK2CMV5Ts+tNX1+fXzzbEPA3Jf6p+zZgG7AN+D+AH+VTwb4aTOgTAAAAAElFTkSuQmCCd3iocy4DAAA=</data>
+        <length>1104</length>
+        <position>1</position>
+        <sys_attachment display_value="image" sys_id="9596361cdb9023001b610181ca96190d">9596361cdb9023001b610181ca96190d</sys_attachment>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-08-29 12:48:03</sys_created_on>
+        <sys_id>5996361cdb9023001b610181ca96190d</sys_id>
+    </sys_attachment_doc>
+</record_update>

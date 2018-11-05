@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sp_dependency">
+    <sp_dependency action="INSERT_OR_UPDATE">
+        <module/>
+        <name>esri_dep</name>
+        <page_load>false</page_load>
+        <sp_portals/>
+        <sys_class_name>sp_dependency</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-08-28 09:00:41</sys_created_on>
+        <sys_id>6ce8380cdb9ca3001b610181ca96195e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>esri_dep</sys_name>
+        <sys_package display_value="arcgis_portal" source="x_270741_arcgis_po">8302887fdb44a3001b610181ca96190b</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="arcgis_portal">8302887fdb44a3001b610181ca96190b</sys_scope>
+        <sys_update_name>sp_dependency_6ce8380cdb9ca3001b610181ca96195e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-08-28 09:00:41</sys_updated_on>
+    </sp_dependency>
+</record_update>

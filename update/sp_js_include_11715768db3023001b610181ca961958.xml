@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sp_js_include">
+    <sp_js_include action="INSERT_OR_UPDATE">
+        <display_name>shp.js</display_name>
+        <source>local</source>
+        <sys_class_name>sp_js_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-09-24 05:57:11</sys_created_on>
+        <sys_id>11715768db3023001b610181ca961958</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>shp.js</sys_name>
+        <sys_package display_value="arcgis_portal" source="x_270741_arcgis_po">8302887fdb44a3001b610181ca96190b</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="arcgis_portal">8302887fdb44a3001b610181ca96190b</sys_scope>
+        <sys_ui_script display_value="x_270741_arcgis_po.shp.js">57819768db3023001b610181ca961966</sys_ui_script>
+        <sys_update_name>sp_js_include_11715768db3023001b610181ca961958</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-09-24 05:57:11</sys_updated_on>
+        <url/>
+    </sp_js_include>
+</record_update>

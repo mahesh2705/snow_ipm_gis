@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update>
+    <sys_documentation element="feature_type" label="Feature type" language="en" table="x_270741_arcgis_po_gis_data">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>feature_type</element>
+            <help/>
+            <hint/>
+            <label>Feature type</label>
+            <language>en</language>
+            <name>x_270741_arcgis_po_gis_data</name>
+            <plural>Feature types</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2018-08-28 09:46:29</sys_created_on>
+            <sys_id>8873c180dbdca3001b610181ca9619bd</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>Feature type</sys_name>
+            <sys_package display_value="arcgis_portal" source="x_270741_arcgis_po">8302887fdb44a3001b610181ca96190b</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="arcgis_portal">8302887fdb44a3001b610181ca96190b</sys_scope>
+            <sys_update_name>sys_documentation_x_270741_arcgis_po_gis_data_feature_type_en</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2018-08-28 09:46:29</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

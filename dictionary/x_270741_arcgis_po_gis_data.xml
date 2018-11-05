@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database>
+    <element label="Gis_data" max_length="40" name="x_270741_arcgis_po_gis_data" type="collection">
+        <element label="Feature type" max_length="100" name="feature_type" type="string"/>
+        <element label="Geotag_img" max_length="4000" name="geotag_img" type="string"/>
+        <element label="Incident id" max_length="100" name="incident_id" type="string"/>
+        <element label="Json string" max_length="2000" name="json_string" type="string"/>
+        <element attributes="ignore_filter_on_new=true" default="javascript:global.getNextObjNumberPadded();" label="Number" max_length="40" name="number" type="string"/>
+        <element label="Place" max_length="250" name="place" type="string"/>
+        <element label="Remark" max_length="500" name="remark" type="string"/>
+        <element label="Severity" max_length="100" name="severity" type="string"/>
+    </element>
+</database>

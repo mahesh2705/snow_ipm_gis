@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="m2m_sp_dependency_js_include">
+    <m2m_sp_dependency_js_include action="INSERT_OR_UPDATE">
+        <order>100</order>
+        <sp_dependency display_value="esri_dep">6ce8380cdb9ca3001b610181ca96195e</sp_dependency>
+        <sp_js_include display_value="togeojson.js">d8a21ba8db3023001b610181ca9619a7</sp_js_include>
+        <sys_class_name>m2m_sp_dependency_js_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2018-09-24 06:01:40</sys_created_on>
+        <sys_id>0ee21ba8db3023001b610181ca9619ae</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>esri_dep.togeojson.js</sys_name>
+        <sys_package display_value="arcgis_portal" source="x_270741_arcgis_po">8302887fdb44a3001b610181ca96190b</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="arcgis_portal">8302887fdb44a3001b610181ca96190b</sys_scope>
+        <sys_update_name>m2m_sp_dependency_js_include_0ee21ba8db3023001b610181ca9619ae</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2018-09-24 06:01:40</sys_updated_on>
+    </m2m_sp_dependency_js_include>
+</record_update>
